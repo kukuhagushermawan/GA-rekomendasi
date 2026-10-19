@@ -1,0 +1,29 @@
+\section{Pembahasan}
+\label{sec:pembahasan}
+
+\subsection{Mengapa GA Unggul}
+
+Kedua varian greedy terjebak pada satu kriteria lokal. \textbf{Greedy termurah} memilih destinasi gratis dan murah lebih dulu, sehingga waktunya sudah habis (30,6 jam) ketika biayanya baru Rp216.345 dari anggaran Rp1.000.000. \textit{Cost score}-nya sekitar 0,78, jadi fitness-nya rendah. \textbf{Greedy terdekat} bergantung pada titik awal dan tidak pernah menukar pilihan yang sudah diambil, sehingga rata-rata hanya mengisi 28,7 jam dan Rp847.777. \textbf{Pencarian acak} melompat ke destinasi yang berjauhan sehingga biaya taksi membengkak. Dengan jumlah evaluasi yang sama, fitness terbaiknya hanya 3,82 pada skenario 1. Artinya, keunggulan GA tidak berasal dari banyaknya evaluasi, tetapi dari pencarian yang terarah oleh seleksi, crossover, dan mutasi.
+
+Pada skenario 1, GA rata-rata memakai Rp996.297 (99,6\% anggaran) dan 33,9 jam (96,9\% batas waktu) tanpa melanggar keduanya. Ini adalah titik ``paling seimbang'' yang dicari fungsi fitness. Fitness skenario 1 lebih rendah daripada skenario 2 dan 3 karena untuk mengisi 35 jam dibutuhkan sekitar 22 destinasi, sehingga kombinasi yang harus disusun jauh lebih banyak.
+
+\subsection{Peran Komponen GA}
+
+Representasi dua bagian membuat setiap kromosom selalu sah, sehingga tidak ada evaluasi yang terbuang untuk rute rusak. Order crossover mempertahankan urutan relatif dari induk, sehingga potongan rute yang efisien dapat diwariskan. Greedy seeding memberi titik awal yang valid (44\% individu generasi awal valid), tetapi GA tetap memperbaikinya: fitness terbaik naik 4,3 kali dari generasi awal dan perbaikan pertama terjadi pada generasi 13. Elitisme menjamin rencana terbaik tidak hilang, sedangkan mutasi tambah-lokal menambah destinasi di sekitar rute alih-alih di lokasi acak yang jauh.
+
+\subsection{Sensitivitas Parameter}
+
+\begin{itemize}
+  \item \textbf{Ukuran populasi.} Populasi lebih besar memberi fitness lebih tinggi dan lebih konsisten (18,04 $\pm$ 9,12 pada 25 individu, 24,53 $\pm$ 4,32 pada 200 individu), tetapi waktunya naik 7,7 kali. Nilai bawaan 100 menjaga waktu tetap di bawah satu detik.
+  \item \textbf{Peluang mutasi.} Mutasi 0,2 terlalu merusak dan menurunkan fitness menjadi 14,86. Nilai 0,01--0,1 memberi rata-rata yang mirip, tetapi 0,01 sangat tidak konsisten (simpangan baku 12,66) karena populasi cepat seragam. Nilai bawaan 0,05 memberi hasil paling konsisten.
+  \item \textbf{Peluang crossover.} Tidak ada pola yang jelas. Nilai 0,6 memberi rata-rata tertinggi (26,55), tetapi semua selisihnya masih dalam satu simpangan baku, sehingga dengan 10 seed perbedaannya belum dapat dianggap nyata.
+\end{itemize}
+
+\subsection{Keterbatasan}
+
+\begin{itemize}
+  \item Data tidak memuat titik awal (hotel), sehingga hanya perjalanan antardestinasi yang dihitung. Jam buka juga belum diperhitungkan karena hanya tersedia untuk 100 dari 201 atraksi.
+  \item Status VALID mengikuti total biaya dan durasi. Rencana yang VALID masih bisa membutuhkan hari tambahan pada jadwal harian. Kasus ini diberi penalti dan peringkat lebih rendah, dan pada contoh \Tabelref{tab:top5} kelima rencana muat dalam 5 hari.
+  \item Delapan atraksi dengan data rute rusak dikeluarkan. Dua pasangan berjarak 0 di matriks memakai nilai pengganti 15 km dari kode asli, yang terlalu besar untuk pasangan yang bersebelahan.
+  \item Contoh validitas pada proposal (rute ID001--ID006 dengan 32 jam dan Rp600.000) bersifat ilustratif. Dengan data asli, enam atraksi pertama berdurasi 11,23 jam dengan biaya Rp1.097.025.
+\end{itemize}

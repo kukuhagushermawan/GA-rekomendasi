@@ -1,0 +1,10 @@
+\section{Kesimpulan}
+
+\begin{enumerate}
+  \item Masalah rekomendasi rencana wisata berhasil dimodelkan sebagai gabungan pemilihan dan pengurutan destinasi. Kromosom dua bagian (\texttt{mask} dan \texttt{order}) selalu menghasilkan rute yang sah, dan fungsi fitness $1/(\text{cost\_score} + \text{duration\_score})$ dengan penalti dan bonus minat mengarahkan GA ke rencana yang valid dan seimbang.
+  \item Pada tiga skenario, fitness rata-rata GA 3,8 hingga 5,9 kali lebih tinggi daripada pembanding terbaik (greedy termurah, greedy terdekat, dan pencarian acak dengan jumlah evaluasi yang sama). Semua rekomendasi valid dan dihasilkan dalam waktu kurang dari satu detik.
+  \item Populasi yang lebih besar meningkatkan kualitas dengan biaya waktu, peluang mutasi yang terlalu tinggi (0,2) merusak hasil, sedangkan peluang crossover tidak berpengaruh nyata pada rentang 0,4--0,95.
+  \item Sistem tersedia sebagai aplikasi web dengan peta rute, jadwal harian, grafik evolusi, halaman eksperimen, dan fitur unggah dataset sendiri, sehingga tidak terbatas pada Jakarta.
+\end{enumerate}
+
+Pengembangan selanjutnya dapat menambahkan titik awal penginapan dan jam buka, memakai pendekatan multi-objektif seperti NSGA-II untuk menampilkan pilihan kompromi biaya--durasi secara lengkap, serta menambah jumlah seed agar perbedaan antarparameter dapat diuji secara statistik.

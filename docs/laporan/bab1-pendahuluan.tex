@@ -1,0 +1,41 @@
+\section{Pendahuluan}
+
+\subsection{Latar Belakang}
+
+Layanan digital kini menjadi bagian dari cara orang merencanakan perjalanan. Pada 2020, Asia Tenggara memiliki sekitar 400 juta pengguna internet aktif dan 94\% di antaranya berniat tetap memakai layanan digital setelah pandemi \cite{econ2020}. Nilai transaksi perjalanan daring di Indonesia mencapai US\$9 miliar pada 2024, tumbuh 24\% per tahun \cite{econ2024}, sementara perjalanan wisatawan nusantara Januari--Agustus 2024 mencapai 674,6 juta, tumbuh 19,2\% \cite{bps2024}. Rekomendasi yang tepat menghemat waktu wisatawan dalam mencari dan memutuskan.
+
+Namun, rekomendasi wisata tidak cukup hanya menebak destinasi yang disukai. Sistem harus menemukan \emph{kombinasi} destinasi beserta \emph{urutan} kunjungannya yang pas dengan anggaran, waktu, dan jumlah orang. Dari 201 destinasi terdapat $2^{201} \approx 3{,}2 \times 10^{60}$ kemungkinan himpunan destinasi, belum termasuk urutannya. Pendekatan \textit{greedy} (pilih yang termurah atau terdekat dulu) mudah terjebak pada pilihan yang tampak baik secara lokal. Algoritma Genetika (GA) \cite{holland1975, goldberg1989} cocok untuk masalah seperti ini karena menjelajahi banyak solusi sekaligus lewat populasi, diarahkan oleh fungsi fitness, dan konvergen ke solusi yang sangat baik dalam waktu singkat.
+
+\subsection{Tujuan}
+
+\begin{enumerate}
+  \item Memodelkan rekomendasi rencana perjalanan sebagai gabungan masalah pemilihan (mirip Knapsack) dan pengurutan rute (mirip TSP), dengan batas anggaran dan waktu.
+  \item Membangun GA lengkap tanpa pustaka GA siap pakai: representasi kromosom, fungsi fitness, seleksi, crossover, mutasi, elitisme, dan kriteria berhenti.
+  \item Membuktikan efektivitas GA terhadap metode pembanding (dua varian greedy dan pencarian acak) serta menganalisis sensitivitas parameternya.
+  \item Menyajikan hasilnya dalam aplikasi web interaktif yang dapat memakai dataset pengguna sendiri.
+\end{enumerate}
+
+\subsection{Sumber Kode}
+
+Seluruh kode ditulis dalam TypeScript dan tersedia di \url{https://github.com/kukuhagushermawan/GA-rekomendasi}. Mesin GA berada di folder \texttt{src/ga/} dan dipisah per tahap agar mudah ditelusuri (\Tabelref{tab:kode}).
+
+\begin{table}[H]
+\centering
+\caption{Pemetaan berkas kode ke isi laporan.}
+\label{tab:kode}
+\small
+\begin{tabular}{@{}l >{\raggedright\arraybackslash}p{8.4cm} l@{}}
+\toprule
+\textbf{Berkas} & \textbf{Isi} & \textbf{Subbab} \\
+\midrule
+\texttt{data.ts}       & membaca dan memvalidasi dataset, menyusun matriks per nama & \ref{sec:data} \\
+\texttt{kromosom.ts}   & representasi kromosom dua bagian dan dekodenya & \ref{sec:kromosom} \\
+\texttt{fitness.ts}    & biaya, durasi, validitas, fitness, jadwal harian & \ref{sec:model}, \ref{sec:fitness} \\
+\texttt{operator.ts}   & seleksi, crossover, dan mutasi & \ref{sec:operator} \\
+\texttt{ga.ts}         & populasi awal, loop GA, elitisme, kriteria berhenti, top-5 & \ref{sec:operator} \\
+\texttt{pembanding.ts} & greedy, pencarian acak, eksperimen & \ref{sec:eksperimen} \\
+\texttt{worker.ts}     & menjalankan GA di Web Worker untuk aplikasi web & \ref{sec:implementasi} \\
+\texttt{tests/ga.test.ts} & 37 uji unit & \ref{sec:verifikasi} \\
+\bottomrule
+\end{tabular}
+\end{table}

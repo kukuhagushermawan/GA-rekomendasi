@@ -1,0 +1,151 @@
+%=======================================================================
+%  Laporan Proyek Algoritma Genetika - Wisata Genetik
+%  File utama Overleaf: main.tex  (compiler: pdfLaTeX)
+%=======================================================================
+\documentclass[11pt]{article}
+
+% ---------- Ukuran kertas & margin ----------
+\usepackage[a4paper, top=2.1cm, bottom=2.1cm, left=2.4cm, right=2.4cm, footskip=1.0cm]{geometry}
+
+% ---------- Font & bahasa ----------
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{mathptmx}
+\usepackage{microtype}
+\linespread{1.07}
+
+% ---------- Paket pendukung ----------
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{booktabs}
+\usepackage{multirow}
+\usepackage{array}
+\usepackage{float}
+\usepackage[font=small,labelfont=bf,skip=4pt]{caption}
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{titlesec}
+\usepackage[section]{placeins}
+\usepackage{indentfirst}
+\usepackage{xurl}
+\usepackage{xcolor}
+\usepackage[hidelinks]{hyperref}
+\usepackage{tikz}
+\usetikzlibrary{positioning, arrows.meta, fit, backgrounds, calc}
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18, /pgf/number format/use comma}
+
+% ---------- Warna identitas (sama dengan aplikasi) ----------
+\definecolor{ugmnavy}{HTML}{0C2A56}
+\definecolor{ugmgold}{HTML}{F5C400}
+\definecolor{abu}{HTML}{94A3B8}
+
+% ---------- Rujukan Gambar/Tabel yang seluruh tulisannya bisa diklik ----------
+\newcommand{\Gambarref}[1]{\hyperref[#1]{Gambar~\ref*{#1}}}
+\newcommand{\Tabelref}[1]{\hyperref[#1]{Tabel~\ref*{#1}}}
+
+% ---------- Istilah bahasa Indonesia ----------
+\renewcommand{\figurename}{Gambar}
+\renewcommand{\tablename}{Tabel}
+\renewcommand{\refname}{Daftar Pustaka}
+\renewcommand{\contentsname}{Daftar Isi}
+
+% ---------- Format judul bagian ----------
+\titleformat{\section}{\normalfont\large\bfseries}{\thesection}{0.6em}{}
+\titleformat{\subsection}{\normalfont\normalsize\bfseries}{\thesubsection}{0.6em}{}
+\titlespacing*{\section}{0pt}{2.0ex plus .3ex minus .2ex}{1.0ex plus .2ex}
+\titlespacing*{\subsection}{0pt}{1.6ex plus .3ex minus .2ex}{0.7ex plus .2ex}
+\setlist[enumerate]{itemsep=1pt, topsep=2pt, parsep=0pt, leftmargin=1.6em}
+\setlist[itemize]{itemsep=1pt, topsep=2pt, parsep=0pt, leftmargin=1.6em}
+\setlength{\parindent}{1.2em}
+\setlength{\textfloatsep}{8pt plus 2pt minus 2pt}
+\setlength{\intextsep}{8pt plus 2pt minus 2pt}
+\renewcommand{\arraystretch}{1.12}
+
+% ---------- Nama mata kuliah (ubah di sini bila perlu) ----------
+\newcommand{\matakuliah}{ALGORITMA GENETIKA (PACS262501)}
+
+\begin{document}
+
+%=======================================================================
+% HALAMAN JUDUL
+%=======================================================================
+\begin{titlepage}
+\centering
+\thispagestyle{empty}
+\vspace*{\fill}
+\large
+
+\textbf{LAPORAN PROYEK}\\
+\textbf{\matakuliah}
+
+\vspace{1.1cm}
+\begin{minipage}{0.86\textwidth}
+\centering\bfseries
+OPTIMASI REKOMENDASI RENCANA PERJALANAN WISATA MENGGUNAKAN ALGORITMA GENETIKA
+\end{minipage}
+
+\vspace{1.1cm}
+\includegraphics[width=6cm]{gambar/logo-ugm.png}
+
+\vspace{1.1cm}
+\textbf{DISUSUN OLEH:}\\[4pt]
+Azhar Maulana (24/533487/PA/22582)\\
+Kukuh Agus Hermawan (24/533395/PA/22573)
+
+\vspace{1.1cm}
+\textbf{PROGRAM STUDI ILMU KOMPUTER}\\
+\textbf{DEPARTEMEN ILMU KOMPUTER DAN ELEKTRONIKA}\\
+\textbf{FAKULTAS MATEMATIKA DAN ILMU PENGETAHUAN ALAM}\\
+\textbf{UNIVERSITAS GADJAH MADA}\\
+\textbf{SLEMAN, DAERAH ISTIMEWA YOGYAKARTA}\\
+\textbf{SEMESTER GANJIL 2026/2027}
+\vspace*{\fill}
+\end{titlepage}
+
+\tableofcontents
+\thispagestyle{empty}
+\newpage
+\setcounter{page}{1}
+\pagestyle{plain}
+
+\input{bab1-pendahuluan}
+\input{bab2-metode}
+\input{bab3-hasil}
+\input{bab4-pembahasan}
+\input{bab5-kesimpulan}
+
+%=======================================================================
+% DAFTAR PUSTAKA
+%=======================================================================
+\begin{thebibliography}{9}
+\setlength{\itemsep}{2pt}
+
+\bibitem{bps2024}
+Badan Pusat Statistik. (2024). Kunjungan wisatawan mancanegara (wisman) pada Agustus 2024 mencapai 1,34 juta kunjungan, naik 18,30 persen (y-on-y). \url{https://www.bps.go.id/en/pressrelease/2024/10/01/2355/}
+
+\bibitem{davis1985}
+Davis, L. (1985). Applying Adaptive Algorithms to Epistatic Domains. \textit{Proceedings of the 9th International Joint Conference on Artificial Intelligence (IJCAI)}, 162--164.
+
+\bibitem{goldberg1989}
+Goldberg, D. E. (1989). \textit{Genetic Algorithms in Search, Optimization, and Machine Learning}. Addison-Wesley.
+
+\bibitem{econ2020}
+Google, Temasek, dan Bain \& Company. (2020). \textit{e-Conomy SEA 2020: Resilient and racing ahead}. \url{https://www.bain.com/insights/e-conomy-sea-2020}
+
+\bibitem{econ2024}
+Google, Temasek, dan Bain \& Company. (2024). \textit{e-Conomy SEA 2024: Profits on the rise, harnessing SEA's advantage}. \url{https://services.google.com/fh/files/misc/e_conomy_sea_2024_report.pdf}
+
+\bibitem{holland1975}
+Holland, J. H. (1975). \textit{Adaptation in Natural and Artificial Systems}. University of Michigan Press.
+
+\bibitem{qomariyah2021}
+Qomariyah, N. N. dan Kazakov, D. (2021). A genetic-based pairwise trip planner recommender system. \textit{Journal of Big Data}, 8, 77. \url{https://doi.org/10.1186/s40537-021-00470-6}
+
+\bibitem{repo}
+Halim, N. M., Qomariyah, N. N., dan Kazakov, D. \textit{GA-pairwise-recommender-system} (data \texttt{jsonAttraction.txt}, \texttt{distanceMatrix.csv}, \texttt{durationMatrix.csv}). \url{https://github.com/nnqomariyah/GA-pairwise-recommender-system}
+
+\end{thebibliography}
+
+\end{document}

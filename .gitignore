@@ -21,9 +21,9 @@ _arsip_lokal/
 .claude/
 
 # template & bahan laporan/presentasi (lokal)
-template/
-laporan/
-presentasi/
+/template/
+/laporan/
+/presentasi/
 
 # misc
 .DS_Store

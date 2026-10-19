@@ -1,0 +1,171 @@
+\section{Metodologi}
+
+\subsection{Data}
+\label{sec:data}
+
+Dataset bawaan berasal dari repositori kode makalah acuan \cite{qomariyah2021, repo} dan dipakai apa adanya tanpa data sintetis. Isinya:
+\begin{itemize}
+  \item \texttt{jsonAttraction.txt}: 201 atraksi di Jabodetabek, masing-masing dengan harga tiket masuk (HTM, rupiah per orang), lama kunjungan (jam), 1--5 tag kategori, dan koordinat. Sebanyak 92 atraksi gratis, median HTM Rp2.000, dan rata-rata lama kunjungan 1,52 jam.
+  \item \texttt{distanceMatrix.csv} dan \texttt{durationMatrix.csv}: jarak jalan (meter) dan waktu tempuh (detik) antaratraksi dari Google Distance Matrix, berukuran $202 \times 202$ karena memuat satu label tambahan ``Jakarta''. Urutan barisnya tidak sama dengan urutan atraksi, sehingga sel matriks dicari berdasarkan nama.
+\end{itemize}
+
+Audit data menemukan delapan atraksi bermasalah: tujuh memiliki jarak lebih dari 100 km ke hampir semua atraksi lain (salah geokode, misalnya National Monument ke Museum of East Timor tercatat 3.096 km), dan satu tidak memiliki rute sama sekali (semua sel bernilai $-1$). Kedelapannya tidak dijadikan kandidat, sehingga GA bekerja dengan \textbf{193 kandidat}. Sel bernilai $-1$ atau 0 di luar diagonal diganti 15 km dan 1.300 detik, mengikuti aturan kode asli \cite{repo}. Delapan tag yang tersedia diberi label Indonesia untuk antarmuka: alam (81 atraksi), ramah anak (68), museum (43), seni \& budaya (31), sejarah (24), taman hiburan (21), pantai (9), dan favorit lokal (8).
+
+Pengguna juga dapat mengunggah dataset sendiri dengan format yang sama. Setiap berkas divalidasi dengan skema \texttt{zod} sebelum dipakai, sehingga sistem tidak terbatas pada Jakarta.
+
+\subsection{Model Masalah}
+\label{sec:model}
+
+Masukan pengguna adalah anggaran $B$, jumlah hari, jam per hari, jumlah orang $p$, dan bobot minat $w_t \in [0, 1]$ untuk setiap tag. Batas jam total adalah $T = \text{hari} \times \text{jam per hari}$. Sebuah rencana adalah rute berurutan $R = (r_1, \dots, r_m)$ tanpa destinasi ganda. Biaya dan durasinya:
+\begin{align}
+C &= p \sum_{i=1}^{m} \text{HTM}_{r_i} \;+\; 5.000 \left\lceil \tfrac{p}{4} \right\rceil \sum_{k=1}^{m-1} d_{r_k r_{k+1}}, \label{eq:biaya}\\
+D &= \sum_{i=1}^{m} v_{r_i} \;+\; \sum_{k=1}^{m-1} t_{r_k r_{k+1}}, \label{eq:durasi}
+\end{align}
+dengan $d$ jarak (km), $t$ waktu tempuh (jam), $v$ lama kunjungan, dan Rp5.000/km tarif taksi dari kode asli \cite{repo}, satu taksi untuk setiap empat orang. Rencana dinyatakan
+\begin{equation}
+\textbf{VALID} \iff C \le B \;\wedge\; D \le T.
+\end{equation}
+Masalah ini menggabungkan \textbf{pemilihan} destinasi (mirip Knapsack) dan \textbf{pengurutan} rute (mirip TSP), sehingga representasi kromosom harus menangkap keduanya.
+
+\subsection{Representasi Kromosom}
+\label{sec:kromosom}
+
+Kromosom terdiri dari dua bagian berukuran $n$ (jumlah kandidat): \texttt{mask}, larik biner yang menandai destinasi terpilih, dan \texttt{order}, permutasi seluruh kandidat yang menyatakan urutan relatif. Rute diperoleh dengan membaca \texttt{order} dari kiri dan mengambil kandidat yang \texttt{mask}-nya 1 (\Gambarref{fig:kromosom}).
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\small},
+  gen/.style={rectangle, draw=ugmnavy, thick, minimum width=0.85cm, minimum height=0.7cm, rounded corners=2pt},
+  pilih/.style={gen, fill=ugmgold!70},
+  arr/.style={-{Latex[length=2mm]}, thick, ugmnavy}
+]
+\node[anchor=east] at (-0.2,1.0) {\texttt{mask}};
+\node[anchor=east] at (-0.2,0) {\texttt{order}};
+\foreach \i/\m in {0/0,1/1,2/0,3/1,4/1,5/0} {
+  \ifnum\m=1 \node[pilih] (m\i) at (\i*1.0+0.4,1.0) {\m}; \else \node[gen] (m\i) at (\i*1.0+0.4,1.0) {\m}; \fi
+  \node[font=\scriptsize, gray] at (\i*1.0+0.4,1.55) {\i};
+}
+\foreach \j/\g in {0/4,1/0,2/3,3/1,4/2,5/5} {
+  \pgfmathtruncatemacro{\sel}{(\g==1 || \g==3 || \g==4) ? 1 : 0}
+  \ifnum\sel=1 \node[pilih] (o\j) at (\j*1.0+0.4,0) {\g}; \else \node[gen] (o\j) at (\j*1.0+0.4,0) {\g}; \fi
+}
+\node[font=\scriptsize, gray, anchor=west] at (6.0,1.55) {indeks kandidat};
+\draw[arr] (6.3,0.5) -- node[above]{dekode} (8.0,0.5);
+\node[pilih, circle, minimum width=0.7cm] (r1) at (8.6,0.5) {4};
+\node[pilih, circle, minimum width=0.7cm] (r2) at (9.7,0.5) {3};
+\node[pilih, circle, minimum width=0.7cm] (r3) at (10.8,0.5) {1};
+\draw[arr] (r1) -- (r2); \draw[arr] (r2) -- (r3);
+\node[font=\scriptsize] at (9.7,-0.25) {rute};
+\end{tikzpicture}
+\caption{Kromosom dua bagian dengan $n = 6$. Kandidat 1, 3, dan 4 dipilih (kuning); urutannya dibaca dari \texttt{order}, sehingga rutenya $4 \to 3 \to 1$.}
+\label{fig:kromosom}
+\end{figure}
+
+Representasi ini dipilih karena tiga alasan. Pertama, setiap kromosom selalu terdekode menjadi rute yang sah tanpa destinasi ganda, sehingga tidak perlu proses perbaikan. Kedua, operator standar dapat langsung dipakai pada bagian yang sesuai: crossover biner pada \texttt{mask} dan \textit{order crossover} pada \texttt{order}. Ketiga, posisi kandidat yang sedang tidak dipilih tetap diwariskan, sehingga ketika kandidat itu dipilih kembali, letaknya di rute sudah ``teringat''.
+
+\subsection{Fungsi Fitness}
+\label{sec:fitness}
+
+Fitness mengikuti makalah acuan \cite{qomariyah2021}, yaitu kebalikan dari jumlah kesalahan biaya dan durasi terhadap targetnya. Kesalahan dihitung relatif agar biaya (rupiah) dan durasi (jam) setara:
+\begin{equation}
+\text{cost\_score} = \frac{|C - B|}{B}, \qquad \text{duration\_score} = \frac{|D - T|}{T}.
+\end{equation}
+Fungsi akhirnya menambahkan penalti pelanggaran batas dan bonus kecocokan minat:
+\begin{equation}
+\text{fitness} = \frac{1 + w_p \cdot \text{minat}}{\varepsilon + \text{cost\_score} + \text{duration\_score} + w_v\!\left(\frac{\max(0, C-B)}{B} + \frac{\max(0, D-T)}{T}\right) + w_s \frac{O}{T}},
+\label{eq:fitness}
+\end{equation}
+dengan $O$ kelebihan jam jadwal harian (Subbab~\ref{sec:jadwal}). Skor minat sebuah destinasi adalah bobot tertinggi di antara tag-nya dibagi bobot maksimum masukan, dan \textit{minat} rencana adalah rata-ratanya. Bobot bawaannya $w_v = 10$, $w_s = 1$, $w_p = 1$, dan $\varepsilon = 0{,}01$. Penalti $w_v = 10$ membuat pelanggaran sebelas kali lebih mahal daripada kekurangan dengan selisih yang sama, sehingga GA terdorong ke sisi valid. Kekurangan tetap dihukum karena tujuannya adalah titik \emph{paling seimbang}: rencana yang memanfaatkan anggaran dan waktu sebaik mungkin tanpa melanggarnya. Dengan $w_v = w_s = w_p = 0$, Persamaan~(\ref{eq:fitness}) kembali menjadi rumus makalah acuan.
+
+\subsection{Operator Genetika}
+\label{sec:operator}
+
+\textbf{Populasi awal.} Dari 100 individu, 20\% dibangun dengan \textit{greedy seeding}: mulai dari kandidat acak (berbobot minat), lalu berulang kali memilih acak satu dari lima kandidat terdekat yang masih layak (biaya $\le B$, durasi $\le T$, dan jadwal harian tetap muat). Individu ini selalu valid, sehingga populasi awal tidak seluruhnya tidak valid. Sisanya berisi $k \sim U[1, k_{\max}]$ kandidat acak, dengan $k_{\max}$ perkiraan jumlah destinasi yang muat dalam $T$.
+
+\textbf{Seleksi.} Tersedia seleksi turnamen dengan $k = 3$ (bawaan), yaitu tiga individu diambil acak lalu yang fitness-nya tertinggi menang, dan \textit{roulette wheel} dengan peluang $f_i / \sum_j f_j$.
+
+\textbf{Crossover} (peluang 0,8). Bagian \texttt{mask} memakai \textit{uniform crossover} (tiap bit ditukar dengan peluang $\tfrac12$) atau \textit{one-point}. Bagian \texttt{order} memakai \textit{order crossover} (OX) \cite{davis1985}: segmen acak disalin dari induk pertama, lalu posisi lain diisi gen induk kedua sesuai urutannya (\Gambarref{fig:ox}). Anaknya selalu berupa permutasi yang sah.
+
+\begin{figure}[H]
+\centering
+\begin{tikzpicture}[
+  every node/.style={font=\small},
+  sel/.style={rectangle, draw=ugmnavy, minimum width=0.62cm, minimum height=0.55cm},
+  seg/.style={sel, fill=ugmgold!70},
+]
+\foreach \row/\label/\vals/\a/\b in {0/Induk 1/{1,2,3,4,5,6,7,8,9}/4/7, -0.8/Induk 2/{4,5,2,1,8,7,6,9,3}/0/0, -1.8/Anak/{2,1,8,4,5,6,7,9,3}/4/7} {
+  \node[anchor=east] at (-0.1,\row) {\label};
+  \foreach \v [count=\c] in \vals {
+    \pgfmathtruncatemacro{\inseg}{(\c>=\a && \c<=\b) ? 1 : 0}
+    \ifnum\inseg=1 \node[seg] at (\c*0.62,\row) {\v}; \else \node[sel] at (\c*0.62,\row) {\v}; \fi
+  }
+}
+\node[anchor=west, font=\footnotesize, text width=5.6cm] at (6.2,-0.8) {segmen 4--7 disalin dari induk 1; sisanya diisi gen induk 2 mulai setelah segmen: 9, 3, 2, 1, 8};
+\end{tikzpicture}
+\caption{Contoh \textit{order crossover} \cite{davis1985}.}
+\label{fig:ox}
+\end{figure}
+
+\textbf{Mutasi} (peluang 0,05 per destinasi di rute). Satu dari empat operator dipilih acak: \textit{swap} (tukar dua destinasi), \textit{insert} (pindahkan satu destinasi), \textit{tambah}, dan \textit{hapus}. Mutasi tambah memilih salah satu dari sepuluh tetangga terdekat sebuah destinasi di rute dengan peluang 0,8 dan menyisipkannya tepat setelah destinasi itu. Dengan cara ini mutasi tidak membuat rute memutar jauh.
+
+\textbf{Elitisme dan kriteria berhenti.} Dua individu terbaik disalin utuh ke generasi berikutnya, sehingga fitness terbaik tidak pernah turun. GA berhenti setelah 200 generasi atau bila fitness terbaik tidak membaik selama 100 generasi.
+
+\textbf{Keluaran.} Selama run, rencana terbaik disimpan per himpunan destinasi. Lima rencana diambil dengan urutan: valid lebih dulu, lalu yang jadwal hariannya muat, lalu fitness tertinggi, dengan syarat setiap pasangan berbeda minimal dua destinasi. \Tabelref{tab:parameter} merangkum parameter bawaan, dan semuanya dapat diubah dari antarmuka.
+
+\begin{table}[H]
+\centering
+\caption{Parameter bawaan GA.}
+\label{tab:parameter}
+\small
+\begin{tabular}{@{}l l l@{}}
+\toprule
+\textbf{Parameter} & \textbf{Nilai} & \textbf{Keterangan} \\
+\midrule
+Ukuran populasi & 100 & 20\% greedy seeding, 80\% acak \\
+Generasi maksimum & 200 & berhenti lebih awal bila stagnan 100 generasi \\
+Seleksi & turnamen, $k = 3$ & alternatif: roulette wheel \\
+Peluang crossover & 0,8 & uniform (\texttt{mask}) + OX (\texttt{order}) \\
+Peluang mutasi & 0,05 & per destinasi di rute \\
+Elitisme & 2 & individu terbaik disalin utuh \\
+Seed acak & 42 & generator mulberry32, hasil dapat direproduksi \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Jadwal Harian}
+\label{sec:jadwal}
+
+Rute dipecah ke hari-hari secara berurutan. Sebuah destinasi masuk ke hari berjalan bila jam hari itu ditambah waktu tempuh dan lama kunjungannya tidak melebihi jam per hari. Jika melebihi, hari baru dimulai. Waktu tempuh dari destinasi terakhir hari sebelumnya dihitung di awal hari berikutnya, sehingga total jam semua hari sama dengan $D$. Jadwal dinyatakan muat bila jumlah harinya tidak melebihi jumlah hari yang tersedia dan tidak ada hari yang melewati batas. Kelebihannya menjadi $O$ pada Persamaan~(\ref{eq:fitness}).
+
+\subsection{Metode Pembanding dan Desain Eksperimen}
+\label{sec:eksperimen}
+
+GA dibandingkan dengan tiga metode yang memakai fungsi fitness yang sama:
+\begin{itemize}
+  \item \textbf{Greedy termurah dulu}: mulai dari destinasi dengan HTM termurah, lalu berulang kali menambah destinasi layak dengan biaya tambahan terkecil.
+  \item \textbf{Greedy terdekat dulu}: mulai dari destinasi acak, lalu berulang kali menambah destinasi layak yang terdekat.
+  \item \textbf{Pencarian acak}: membangkitkan rute acak sebanyak jumlah evaluasi GA pada seed yang sama (paling banyak 19.700), lalu mengambil yang terbaik.
+\end{itemize}
+Setiap metode dijalankan dengan seed 1--20 pada tiga skenario (\Tabelref{tab:skenario}). Analisis sensitivitas mengubah satu parameter dan menjaga parameter lain tetap bawaan, masing-masing dengan 10 seed pada skenario 1.
+
+\begin{table}[H]
+\centering
+\caption{Skenario eksperimen.}
+\label{tab:skenario}
+\small
+\begin{tabular}{@{}c l l l@{}}
+\toprule
+\textbf{No.} & \textbf{Anggaran dan waktu} & \textbf{Orang} & \textbf{Minat} \\
+\midrule
+1 & Rp1.000.000; 5 hari $\times$ 7 jam & 2 & -- \\
+2 & Rp3.000.000; 3 hari $\times$ 10 jam & 2 & museum, pantai, ramah anak \\
+3 & Rp500.000; 2 hari $\times$ 7 jam & 4 & alam \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Implementasi}
+\label{sec:implementasi}
+
+Mesin GA ditulis sendiri dalam TypeScript tanpa pustaka GA. Aplikasi web dibangun dengan Next.js, React, Tailwind CSS, shadcn/ui, Apache ECharts untuk grafik, dan Leaflet dengan peta OpenStreetMap. GA dijalankan di Web Worker agar antarmuka tidak membeku dan progres per generasi dapat ditampilkan langsung. Parameter formulir disimpan di URL sehingga hasil dapat dibagikan dan direproduksi, karena seed yang sama selalu menghasilkan rencana yang sama.
