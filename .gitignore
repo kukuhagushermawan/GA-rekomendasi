@@ -12,6 +12,7 @@ coverage/
 
 # dokumen lokal (slide berisi NIM, salinan paper) — tidak dipublikasikan
 *.pdf
+!docs/laporan/*.pdf
 
 # arsip lokal pekerjaan validasi (versi lengkapnya ada di branch `arsip-validasi`)
 _arsip_lokal/

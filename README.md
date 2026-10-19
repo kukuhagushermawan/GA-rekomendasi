@@ -55,6 +55,11 @@ tests/ga.test.ts    uji unit
 
 Hasil perbandingan dengan greedy dan pencarian acak ada di [`docs/hasil_eksperimen.md`](docs/hasil_eksperimen.md).
 
+## Laporan dan presentasi
+
+- Laporan: [`docs/laporan/Laporan_GA_Wisata_Genetik.pdf`](docs/laporan/Laporan_GA_Wisata_Genetik.pdf). Sumber LaTeX ada di folder yang sama (`main.tex`, kompilasi dengan pdfLaTeX di Overleaf).
+- Presentasi: [`docs/presentasi/Presentasi_GA_Wisata_Genetik.pptx`](docs/presentasi/Presentasi_GA_Wisata_Genetik.pptx)
+
 ## Dataset sendiri
 
 Di halaman **Dataset**, unggah tiga berkas dengan format yang sama seperti `public/data/`:
