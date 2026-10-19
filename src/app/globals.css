@@ -1,0 +1,26 @@
+@import 'tailwindcss';
+
+/* Identitas UGM: biru tua + kuning. Token final disempurnakan di milestone 4. */
+@theme {
+  --color-ugm-navy: #083d6b;
+  --color-ugm-navy-dark: #052a4a;
+  --color-ugm-gold: #f5c400;
+  --color-ugm-gold-soft: #fff4c2;
+}
+
+:root {
+  --background: #ffffff;
+  --foreground: #0f172a;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #07182b;
+    --foreground: #e2e8f0;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+}

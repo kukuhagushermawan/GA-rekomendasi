@@ -1,0 +1,4 @@
+# Data asli harus byte-identik dengan upstream (hash SHA-256 diuji) — jangan konversi akhir baris.
+data/raw/** -text
+tests/fixtures/** -text
+reference/upstream/** -text

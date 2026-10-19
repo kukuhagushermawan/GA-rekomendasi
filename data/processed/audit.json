@@ -1,0 +1,122 @@
+{
+  "attractionCount": 201,
+  "matrixSize": 202,
+  "extraMatrixLabels": [
+    "Jakarta"
+  ],
+  "tagCounts": {
+    "outdoors": 81,
+    "beach": 9,
+    "art-and-culture": 31,
+    "kids-friendly": 68,
+    "history": 24,
+    "museum": 43,
+    "amusement-park": 21,
+    "local-favorite": 8
+  },
+  "unknownTags": [],
+  "freeAttractions": 92,
+  "zeroVisitDuration": [
+    "Monumen Patung Dirgantara"
+  ],
+  "missingRating": [
+    "Jalan Pantai Karnaval Ancol",
+    "Merdeka Square, Jakarta",
+    "Atlantis Water Adventure",
+    "IMAGISPACE",
+    "Jalan Gedung Kesenian"
+  ],
+  "namesWithComma": [
+    "Merdeka Square, Jakarta",
+    "Taman Wisata Alam Mangrove, Angke Kapuk",
+    "Nurul Iman Mosque, Blok M Square"
+  ],
+  "numberMismatch": [],
+  "distance": {
+    "missingCells": 401,
+    "zeroOffDiagonal": [
+      [
+        "Irian Jaya Liberation Monument",
+        "Taman Lapangan Banteng"
+      ],
+      [
+        "Taman Lapangan Banteng",
+        "Irian Jaya Liberation Monument"
+      ],
+      [
+        "Onrust Island",
+        "Pulau Bidadari"
+      ],
+      [
+        "Pulau Bidadari",
+        "Onrust Island"
+      ]
+    ],
+    "nonZeroDiagonal": [
+      "Nofri kasur"
+    ],
+    "asymmetricPairs": 19849
+  },
+  "duration": {
+    "missingCells": 401,
+    "zeroOffDiagonal": [
+      [
+        "Irian Jaya Liberation Monument",
+        "Taman Lapangan Banteng"
+      ],
+      [
+        "Taman Lapangan Banteng",
+        "Irian Jaya Liberation Monument"
+      ],
+      [
+        "Onrust Island",
+        "Pulau Bidadari"
+      ],
+      [
+        "Pulau Bidadari",
+        "Onrust Island"
+      ]
+    ],
+    "nonZeroDiagonal": [
+      "Nofri kasur"
+    ],
+    "asymmetricPairs": 19858
+  },
+  "unroutable": [
+    "Nofri kasur"
+  ],
+  "implausibleDistance": {
+    "thresholdKm": 100,
+    "cells": 2744,
+    "places": [
+      {
+        "name": "East Java Pavilion",
+        "cellsAboveThreshold": 199
+      },
+      {
+        "name": "Merdeka Palace",
+        "cellsAboveThreshold": 199
+      },
+      {
+        "name": "Museum of East Timor",
+        "cellsAboveThreshold": 199
+      },
+      {
+        "name": "National History Museum",
+        "cellsAboveThreshold": 199
+      },
+      {
+        "name": "Pasar Seni",
+        "cellsAboveThreshold": 199
+      },
+      {
+        "name": "Sangga Buana",
+        "cellsAboveThreshold": 199
+      },
+      {
+        "name": "Sarmiento Parakantja Timber",
+        "cellsAboveThreshold": 199
+      }
+    ]
+  }
+}
