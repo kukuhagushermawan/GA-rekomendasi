@@ -8,5 +8,7 @@ export type { EvalContext, Evaluated, TravelTotals } from './evaluate';
 export { crossv2, cutter, generateDynamic, getDuplicateIndex, getTaggedDest, mutate, selection } from './operators';
 export { daySuggestion, optimizeRouteApprox, routeDistanceMatrix } from './route-optimizer';
 export type { OptimizedRoute } from './route-optimizer';
+export { parseNewResults } from './newresults';
+export type { UpstreamResult } from './newresults';
 export { runType8 } from './type8';
 export type { Type8Options, Type8Result } from './type8';

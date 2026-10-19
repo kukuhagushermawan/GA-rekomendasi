@@ -220,9 +220,10 @@ Slide memakai anggaran Rp1.000.000, 5 hari × 7 jam = 35 jam, dan 2 dewasa. Data
 
 Python memakai Mersenne Twister tanpa seed, sehingga run upstream tidak bisa diulang bit-per-bit. Validasi silang di milestone 2 karena itu akan membandingkan **distribusi** hasil (fitness, biaya, durasi, jumlah atraksi) dengan 27 run di `newresults.txt`.
 
-## 7. Keputusan yang perlu disetujui sebelum milestone 2
+## 7. Keputusan (disetujui 2026-10-19, sebelum milestone 2)
 
-1. **7 atraksi dengan jarak salah dan Nofri kasur.** Pilihannya: tetap jadi kandidat (perilaku upstream), atau dikeluarkan dari kumpulan kandidat GA tanpa mengubah datanya.
-2. **Jam per hari.** Pilihannya 7 (slide) atau 10 (upstream). Nilai ini tetap bisa diatur, tetapi perlu nilai default.
-3. **Kategori preferensi.** Pakai 8 tag asli dengan label Indonesia. Kategori "kuliner" tidak tersedia di data.
-4. **Aturan valid.** Slide memakai batas tegas (biaya ≤ anggaran dan durasi ≤ batas jam), sedangkan upstream hanya mencocokkan target. Mesin GA proyek ini direncanakan memakai batas tegas dari slide dengan rumus fitness `1/(cost_score + duration_score)` + penalti, sementara port upstream tetap dipakai untuk validasi silang.
+1. **7 atraksi dengan jarak salah dan Nofri kasur** dikeluarkan dari kumpulan kandidat GA secara default (`buildProblem({ excludeSuspect: true })`). Datanya tidak diubah. Validasi silang upstream tetap memakai seluruh atraksi.
+2. **Jam per hari** default 7 (slide) dan dapat diatur.
+3. **Kategori preferensi** memakai 8 tag asli dengan label Indonesia. Kategori "kuliner" tidak tersedia.
+4. **Aturan valid** memakai batas tegas dari slide, dengan fitness `1/(cost_score + duration_score)` + penalti + bonus preferensi (lihat `docs/desain_ga.md`). Port upstream dipakai untuk validasi silang (`docs/validasi_silang.md`).
+5. **Lisensi** proyek GPL-3.0, mengikuti kode upstream yang diport.

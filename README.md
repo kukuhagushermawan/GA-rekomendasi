@@ -4,8 +4,32 @@ Sistem rekomendasi rencana perjalanan wisata yang dioptimasi dengan **Algoritma 
 
 Wisatawan memasukkan anggaran, durasi, jumlah orang, dan preferensi tag. Sistem lalu mencari kombinasi destinasi (mirip Knapsack) sekaligus urutan kunjungannya (mirip TSP) yang sesuai dengan batas biaya dan waktu.
 
-> **Status: Milestone 1** selesai (scaffold, data asli, skema, loader, port referensi, dan uji).
-> Mesin GA proyek ini dibangun di milestone 2.
+> **Status: Milestone 2** selesai: mesin GA inti, fitness, validasi, uji unit, CLI, dan validasi silang terhadap upstream.
+> Antarmuka web dibangun di milestone 4.
+
+## Mesin GA
+
+Detail desain ada di [`docs/desain_ga.md`](docs/desain_ga.md). Ringkasnya:
+
+- **Kromosom dua bagian.** Bagian pertama adalah mask pemilihan (Knapsack), bagian kedua permutasi urutan (TSP). Hasil dekodenya selalu rute tanpa duplikat.
+- **Validitas** mengikuti slide: biaya ≤ anggaran dan durasi ≤ hari × jam/hari.
+- **Fitness** = `(1 + w_p·preferensi) / (ε + |C−B|/B + |D−T|/T + penalti)`. Dengan bobot penalti dan bonus 0, rumus ini kembali menjadi `1/(cost_score + duration_score)` di slide.
+- **Operator:**
+  - inisialisasi acak + greedy seeding;
+  - seleksi turnamen atau roulette;
+  - crossover uniform/one-point (mask) + OX (urutan);
+  - mutasi swap, insert, tambah, hapus;
+  - elitisme;
+  - berhenti pada generasi maksimum atau stagnasi.
+- **Keluaran** berupa top-5 rencana berbeda, masing-masing dengan rincian biaya, sisa anggaran, skor preferensi, dan jadwal per hari.
+
+```bash
+npm run ga -- --budget 1000000 --days 5 --hours 7 --people 2 --tags museum=1,history=0.5 --seed 42
+```
+
+**Validasi silang** ([`docs/validasi_silang.md`](docs/validasi_silang.md)):
+- Port referensi mereproduksi 243/243 hasil `newresults.txt` upstream secara bit-per-bit.
+- Dengan jumlah evaluasi setara, mesin ini mencapai fitness rata-rata 2,2× lebih tinggi daripada GA upstream pada objektif upstream sendiri.
 
 ## Data
 
@@ -42,6 +66,8 @@ npm run dev
 | Skrip | Fungsi |
 |---|---|
 | `npm run check` | Lint, pemeriksaan tipe, dan uji |
+| `npm run ga -- [opsi]` | Menjalankan GA di terminal pada data asli (opsi di `scripts/run-ga.ts`) |
+| `npm run cross-validate` | Validasi silang terhadap upstream; menulis ulang `docs/validasi_silang.md` |
 | `npm run dataset:build` | Validasi `data/raw/`, lalu tulis `data/processed/dataset.json` + `audit.json` (otomatis sebelum `dev`/`build`) |
 | `npm run fixture:build` | Ekstrak ulang fixture uji (7 baris asli) ke `tests/fixtures/mini/` |
 | `npm test` | Vitest |
@@ -52,14 +78,19 @@ npm run dev
 data/
   raw/                  salinan byte-identik dari upstream (+ SOURCE.md)
   processed/            hasil `dataset:build`: atraksi ternormalisasi + matriks, laporan audit
-docs/audit_referensi.md audit data & kode referensi
+docs/
+  audit_referensi.md    audit data & kode referensi
+  desain_ga.md          desain mesin GA (kromosom, fitness, operator, parameter)
+  validasi_silang.md    laporan validasi silang (dihasilkan skrip)
 reference/upstream/     kode Python, README, LICENSE, newresults.txt upstream (untuk audit/validasi silang)
-scripts/                build-dataset.ts, make-fixture.ts
+scripts/                build-dataset, make-fixture, run-ga, cross-validate
 src/
   app/                  Next.js App Router (halaman sementara)
   lib/data/             skema zod, loader, CSV parser, konversi satuan, audit
+  lib/ga/               mesin GA proyek: konfigurasi, masalah, evaluasi, jadwal, operator, engine
   lib/reference/        port TypeScript perilaku GA upstream (referensi, GPL-3.0)
   lib/random.ts         RNG ber-seed (mulberry32)
+  lib/stats.ts          statistik deskriptif + uji KS dua sampel
 tests/                  uji unit + fixture
 ```
 
@@ -91,7 +122,7 @@ Matriks disimpan dalam satuan aslinya (meter/detik, −1 = tidak tersedia) dan d
 | # | Cakupan | Status |
 |---|---|---|
 | 1 | Scaffold, audit data asli, skema & loader, port referensi, uji | ✅ |
-| 2 | Mesin GA inti, fitness, validasi, uji; validasi silang terhadap `newresults.txt` | ⏳ menunggu persetujuan |
+| 2 | Mesin GA inti, fitness, validasi, uji; validasi silang terhadap `newresults.txt` | ✅ (menunggu tinjauan) |
 | 3 | Pembanding greedy/acak, eksperimen CLI | — |
 | 4 | Web Worker, halaman Perencana & Hasil | — |
 | 5 | Visualisasi evolusi, Eksperimen, Dataset, Tentang | — |
