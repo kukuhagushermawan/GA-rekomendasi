@@ -1,4 +1,2 @@
-# Data asli harus byte-identik dengan upstream (hash SHA-256 diuji) — jangan konversi akhir baris.
-data/raw/** -text
-tests/fixtures/** -text
-reference/upstream/** -text
+# Data asli harus byte-identik dengan sumbernya — jangan konversi akhir baris.
+public/data/** -text

@@ -1,131 +1,75 @@
-# Perencana Wisata Genetik
+# Wisata Genetik
 
-Sistem rekomendasi rencana perjalanan wisata yang dioptimasi dengan **Algoritma Genetika**, dibuat untuk mata kuliah Algoritma Genetika (PACS262501), Universitas Gadjah Mada.
+Rencana wisata terbaik yang pas dengan anggaran dan waktu, disusun dengan **Algoritma Genetika**.
+Proyek mata kuliah Algoritma Genetika (PACS262501), Universitas Gadjah Mada.
 
-Wisatawan memasukkan anggaran, durasi, jumlah orang, dan preferensi tag. Sistem lalu mencari kombinasi destinasi (mirip Knapsack) sekaligus urutan kunjungannya (mirip TSP) yang sesuai dengan batas biaya dan waktu.
-
-> **Status: Milestone 2** selesai: mesin GA inti, fitness, validasi, uji unit, CLI, dan validasi silang terhadap upstream.
-> Antarmuka web dibangun di milestone 4.
-
-## Mesin GA
-
-Detail desain ada di [`docs/desain_ga.md`](docs/desain_ga.md). Ringkasnya:
-
-- **Kromosom dua bagian.** Bagian pertama adalah mask pemilihan (Knapsack), bagian kedua permutasi urutan (TSP). Hasil dekodenya selalu rute tanpa duplikat.
-- **Validitas** mengikuti slide: biaya ≤ anggaran dan durasi ≤ hari × jam/hari.
-- **Fitness** = `(1 + w_p·preferensi) / (ε + |C−B|/B + |D−T|/T + penalti)`. Dengan bobot penalti dan bonus 0, rumus ini kembali menjadi `1/(cost_score + duration_score)` di slide.
-- **Operator:**
-  - inisialisasi acak + greedy seeding;
-  - seleksi turnamen atau roulette;
-  - crossover uniform/one-point (mask) + OX (urutan);
-  - mutasi swap, insert, tambah, hapus;
-  - elitisme;
-  - berhenti pada generasi maksimum atau stagnasi.
-- **Keluaran** berupa top-5 rencana berbeda, masing-masing dengan rincian biaya, sisa anggaran, skor preferensi, dan jadwal per hari.
-
-```bash
-npm run ga -- --budget 1000000 --days 5 --hours 7 --people 2 --tags museum=1,history=0.5 --seed 42
-```
-
-**Validasi silang** ([`docs/validasi_silang.md`](docs/validasi_silang.md)):
-- Port referensi mereproduksi 243/243 hasil `newresults.txt` upstream secara bit-per-bit.
-- Dengan jumlah evaluasi setara, mesin ini mencapai fitness rata-rata 2,2× lebih tinggi daripada GA upstream pada objektif upstream sendiri.
-
-## Data
-
-Proyek ini memakai **dataset asli** dari [GA-pairwise-recommender-system](https://github.com/nnqomariyah/GA-pairwise-recommender-system) (commit `4afb44d`) tanpa data sintetis:
-
-- **201 atraksi** di Jabodetabek: nama, koordinat, HTM (Rp/orang), lama kunjungan (jam), 8 tag, rating, dan foto.
-- **Matriks jarak (meter) dan waktu tempuh (detik)** hasil Google Distance Matrix. Keduanya dipakai **apa adanya** tanpa dihitung ulang.
-
-Hasil audit data dan kode referensi (satuan, nilai kosong, urutan indeks, rumus fitness, bug) ada di [`docs/audit_referensi.md`](docs/audit_referensi.md). Ringkasnya:
-
-| Temuan | Nilai |
-|---|---|
-| Atraksi / label matriks | 201 / 202 (label tambahan "Jakarta") |
-| Tag | outdoors 81 · kids-friendly 68 · museum 43 · art-and-culture 31 · history 24 · amusement-park 21 · beach 9 · local-favorite 8 |
-| Sel matriks −1 | 401 per matriks, seluruhnya dari "Nofri kasur" |
-| Sel jarak > 100 km | 2.744, seluruhnya dari 7 atraksi |
+Pengguna mengisi anggaran, lama liburan, jumlah orang, dan minat. GA memilih kombinasi destinasi (mirip Knapsack) sekaligus urutan kunjungannya (mirip TSP), lalu menampilkan 5 rencana terbaik lengkap dengan peta dan jadwal harian.
 
 ## Menjalankan
-
-Prasyarat: Node.js ≥ 20.11.
 
 ```bash
 npm install
 ```
 
 ```bash
-npm run check
-```
-
-```bash
 npm run dev
 ```
 
-| Skrip | Fungsi |
+Buka http://localhost:3000.
+
+| Perintah | Fungsi |
 |---|---|
+| `npm run dev` | Menjalankan aplikasi web |
 | `npm run check` | Lint, pemeriksaan tipe, dan uji |
-| `npm run ga -- [opsi]` | Menjalankan GA di terminal pada data asli (opsi di `scripts/run-ga.ts`) |
-| `npm run cross-validate` | Validasi silang terhadap upstream; menulis ulang `docs/validasi_silang.md` |
-| `npm run dataset:build` | Validasi `data/raw/`, lalu tulis `data/processed/dataset.json` + `audit.json` (otomatis sebelum `dev`/`build`) |
-| `npm run fixture:build` | Ekstrak ulang fixture uji (7 baris asli) ke `tests/fixtures/mini/` |
-| `npm test` | Vitest |
+| `npm run ga` | Menjalankan GA sekali di terminal |
+| `npm run eksperimen` | GA vs greedy vs acak + sensitivitas, hasil ke `docs/hasil_eksperimen.md` |
 
 ## Struktur
 
 ```
-data/
-  raw/                  salinan byte-identik dari upstream (+ SOURCE.md)
-  processed/            hasil `dataset:build`: atraksi ternormalisasi + matriks, laporan audit
-docs/
-  audit_referensi.md    audit data & kode referensi
-  desain_ga.md          desain mesin GA (kromosom, fitness, operator, parameter)
-  validasi_silang.md    laporan validasi silang (dihasilkan skrip)
-reference/upstream/     kode Python, README, LICENSE, newresults.txt upstream (untuk audit/validasi silang)
-scripts/                build-dataset, make-fixture, run-ga, cross-validate
-src/
-  app/                  Next.js App Router (halaman sementara)
-  lib/data/             skema zod, loader, CSV parser, konversi satuan, audit
-  lib/ga/               mesin GA proyek: konfigurasi, masalah, evaluasi, jadwal, operator, engine
-  lib/reference/        port TypeScript perilaku GA upstream (referensi, GPL-3.0)
-  lib/random.ts         RNG ber-seed (mulberry32)
-  lib/stats.ts          statistik deskriptif + uji KS dua sampel
-tests/                  uji unit + fixture
+public/data/        dataset bawaan (201 destinasi + matriks jarak & waktu tempuh)
+src/ga/
+  data.ts           1. baca & validasi data
+  kromosom.ts       2. representasi kromosom (pilihan + urutan)
+  fitness.ts        3. biaya, durasi, valid/tidak valid, fitness, jadwal harian
+  operator.ts       4. seleksi, crossover, mutasi
+  ga.ts             5. loop GA: populasi awal, elitisme, kriteria berhenti, top-5
+  pembanding.ts     6. greedy, pencarian acak, eksperimen
+  worker.ts         GA dijalankan di Web Worker
+src/app/            halaman web (Beranda, Rencana, Hasil, Evolusi, Eksperimen, Dataset, Tentang)
+tests/ga.test.ts    uji unit
 ```
 
-## Model data
+## Algoritma
 
-`src/lib/data/schema.ts` mendefinisikan dua lapis skema zod:
+| Tahap | Isi |
+|---|---|
+| Kromosom | `mask` (destinasi dipilih) + `order` (urutan kunjungan) |
+| Fitness | `1 / (cost_score + duration_score)` + penalti pelanggaran + bonus minat |
+| Valid | biaya ≤ anggaran dan durasi ≤ hari × jam per hari |
+| Populasi awal | 100 individu: 20% greedy seeding, 80% acak |
+| Seleksi | turnamen (k = 3) atau roulette |
+| Crossover | 0,8: uniform/one-point (pilihan) + order crossover (urutan) |
+| Mutasi | 0,05 per destinasi: swap, insert, tambah, hapus |
+| Elitisme & berhenti | 2 elit, maksimal 200 generasi atau 100 generasi stagnan |
 
-1. **Mentah** (`rawPlaceSchema`): mengikuti struktur `jsonAttraction.txt` persis. `ticketPrice` dan `visitDuration` berupa string digit/desimal.
-2. **Ternormalisasi** (`attractionSchema`): `ticketPriceIdr` (Rp/orang), `visitHours` (jam), `matrixKey` (nama tanpa koma, kunci matriks upstream), `number` (posisi matriks), dan `id` tampilan `ID001…` yang diturunkan dari urutan berkas.
+Hasil perbandingan dengan greedy dan pencarian acak ada di [`docs/hasil_eksperimen.md`](docs/hasil_eksperimen.md).
 
-Matriks disimpan dalam satuan aslinya (meter/detik, −1 = tidak tersedia) dan diindeks ulang **berdasarkan nama**, karena urutannya berbeda dari urutan atraksi. Accessor `distanceKm()` dan `travelHours()` mengonversi satuan dan mengembalikan `null` untuk sel yang tidak tersedia. Accessor ini tidak memberikan estimasi pengganti.
+## Dataset sendiri
 
-## Atribusi dan lisensi
+Di halaman **Dataset**, unggah tiga berkas dengan format yang sama seperti `public/data/`:
 
-- **Data dan logika referensi** berasal dari *GA-pairwise-recommender-system* karya **Nicholas Michael Halim, Nunung Nurul Qomariyah, dan Dimitar Kazakov**, dirilis di bawah **GNU General Public License v3.0**. Salinan lisensinya ada di [`reference/upstream/LICENSE`](reference/upstream/LICENSE).
-- `src/lib/reference/` adalah **terjemahan (port) TypeScript** dari `main.py`, `utils.py`, `chromosome.py`, dan `routeOptimizer.py`. Port ini dipakai **hanya sebagai referensi perilaku** untuk validasi silang, termasuk bug upstream yang sengaja dipertahankan. Sebagai karya turunan, bagian ini tunduk pada **GPL-3.0**.
-- Karena port tersebut ikut didistribusikan, proyek ini secara keseluruhan dirilis di bawah **GNU GPL v3.0** (lihat [`LICENSE`](LICENSE)).
-- Atraksi, matriks jarak, dan matriks durasi awalnya diambil dari Google Maps Platform oleh penulis upstream.
+- **Destinasi**: JSON format asli, atau CSV dengan kolom `name,ticketPrice,visitDuration,tags,lat,lng` (tag dipisah `|`)
+- **Jarak** (meter) dan **durasi** (detik): CSV matriks, baris pertama `origin,<nama destinasi…>`, `-1` = tidak ada rute
 
-### Referensi
+## Data dan lisensi
 
-- Qomariyah, N. N., & Kazakov, D. (2021). A genetic-based pairwise trip planner recommender system. *Journal of Big Data, 8*, 77. https://doi.org/10.1186/s40537-021-00470-6
-- Google, Temasek, & Bain & Company. (2020). *e-Conomy SEA 2020*. https://www.bain.com/insights/e-conomy-sea-2020
-- Google, Temasek, & Bain & Company. (2024). *e-Conomy SEA 2024*. https://services.google.com/fh/files/misc/e_conomy_sea_2024_report.pdf
-- Badan Pusat Statistik. (2024). Kunjungan wisman Agustus 2024. https://www.bps.go.id/en/pressrelease/2024/10/01/2355/
+Dataset bawaan berasal dari [GA-pairwise-recommender-system](https://github.com/nnqomariyah/GA-pairwise-recommender-system) (Halim, Qomariyah & Kazakov), dirilis di bawah GPL-3.0. Proyek ini juga dirilis di bawah [GPL-3.0](LICENSE).
+Audit data dan validasi terhadap kode aslinya tersimpan di branch `arsip-validasi`.
 
-## Milestone
+Referensi utama: Qomariyah, N. N., & Kazakov, D. (2021). A genetic-based pairwise trip planner recommender system. *Journal of Big Data, 8*, 77.
 
-| # | Cakupan | Status |
-|---|---|---|
-| 1 | Scaffold, audit data asli, skema & loader, port referensi, uji | ✅ |
-| 2 | Mesin GA inti, fitness, validasi, uji; validasi silang terhadap `newresults.txt` | ✅ (menunggu tinjauan) |
-| 3 | Pembanding greedy/acak, eksperimen CLI | — |
-| 4 | Web Worker, halaman Perencana & Hasil | — |
-| 5 | Visualisasi evolusi, Eksperimen, Dataset, Tentang | — |
-| 6 | Pengujian, dokumentasi, deploy Vercel | — |
+## Tim
 
-Tim: Azhar Maulana (24/533487/PA/22582), Kukuh Agus Hermawan (24/533395/PA/22573).
+- Azhar Maulana — 24/533487/PA/22582
+- Kukuh Agus Hermawan — 24/533395/PA/22573

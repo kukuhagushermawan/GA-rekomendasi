@@ -1,26 +1,123 @@
 @import 'tailwindcss';
+@import 'tw-animate-css';
+@import 'shadcn/tailwind.css';
 
-/* Identitas UGM: biru tua + kuning. Token final disempurnakan di milestone 4. */
+/* Identitas UGM: latar biru tua, aksen kuning, kartu putih */
 @theme {
   --color-ugm-navy: #083d6b;
   --color-ugm-navy-dark: #052a4a;
+  --color-ugm-ink: #0c2a56;
+  --color-ugm-ink-soft: #15386c;
   --color-ugm-gold: #f5c400;
-  --color-ugm-gold-soft: #fff4c2;
+  --color-ugm-gold-soft: #fff6d1;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-background: var(--background);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
 }
 
 :root {
   --background: #ffffff;
-  --foreground: #0f172a;
+  --foreground: #0f1f33;
+  --card: #ffffff;
+  --card-foreground: #0f1f33;
+  --popover: #ffffff;
+  --popover-foreground: #0f1f33;
+  --primary: #083d6b;
+  --primary-foreground: #ffffff;
+  --secondary: #fff6d1;
+  --secondary-foreground: #052a4a;
+  --muted: #f3f5f8;
+  --muted-foreground: #64748b;
+  --accent: #f5c400;
+  --accent-foreground: #052a4a;
+  --destructive: #c62828;
+  --border: #e5e9f0;
+  --input: #d6dde7;
+  --ring: #083d6b;
+  --radius: 0.625rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #07182b;
-    --foreground: #e2e8f0;
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
+  html {
+    @apply font-sans;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
+/* Animasi ilustrasi landing: garis rute tergambar, titik muncul berurutan. */
+@keyframes draw-route {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+@keyframes pop-stop {
+  from {
+    opacity: 0;
+    transform: scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.route-draw {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: draw-route 1.6s ease-out 0.4s forwards;
+}
+.stop-pop {
+  opacity: 0;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: pop-stop 0.4s ease-out forwards;
+}
+@media (prefers-reduced-motion: reduce) {
+  .route-draw,
+  .stop-pop {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+/* Penanda bernomor pada peta rute. */
+.route-marker {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  border: 2px solid #fff;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  box-shadow: 0 1px 4px rgb(0 0 0 / 0.35);
 }
